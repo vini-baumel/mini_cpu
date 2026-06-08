@@ -7,7 +7,7 @@ stateDiagram-v2
     
     INICIALIZANDO --> ESPERANDO : Transição incondicional
 
-    ESPERANDO --> DESLIGADO : ligar_solto == 1<br/>(Seta rst_mem = 1)
+    ESPERANDO --> DESLIGADO : ligar_solto == 1
     ESPERANDO --> PROCESSANDO : enviar_solto == 1
     
     PROCESSANDO --> ATUALIZANDO_LCD : Decodifica opcode<br/>Estende sinal<br/>Seta we_mem<br/>Roteia ULA
