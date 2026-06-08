@@ -1,60 +1,49 @@
-
-
-## ULA
+## CPU
 ```mermaid
 stateDiagram-v2
     [*] --> DESLIGADO
+
+    DESLIGADO --> INICIALIZANDO : ligar_solto == 1<br/>(Seta rst_mem = 1)
     
-    DESLIGADO --> INICIALIZANDO : Pressionar e soltar "Botão Ligar"
+    INICIALIZANDO --> ESPERANDO : Transição incondicional
+
+    ESPERANDO --> DESLIGADO : ligar_solto == 1<br/>(Seta rst_mem = 1)
+    ESPERANDO --> PROCESSANDO : enviar_solto == 1
     
-    INICIALIZANDO --> AGUARDANDO_INSTRUCAO : Limpa display, zera memória
+    PROCESSANDO --> ATUALIZANDO_LCD : Decodifica opcode<br/>Estende sinal<br/>Seta we_mem<br/>Roteia ULA
     
-    AGUARDANDO_INSTRUCAO --> DESLIGADO : Pressionar "Botão Ligar" novamente
-    AGUARDANDO_INSTRUCAO --> DECODIFICANDO : Pressionar e soltar "Botão Enviar"
-    
-    DECODIFICANDO --> BUSCANDO_OPERANDOS : Extrai Opcode e Registradores
-    BUSCANDO_OPERANDOS --> EXECUTANDO_ULA : Solicita leitura à Memória
-    
-    EXECUTANDO_ULA --> GRAVANDO_MEMORIA : ULA finaliza cálculo
-    GRAVANDO_MEMORIA --> ATUALIZANDO_LCD : Salva no Reg de Destino
-    
-    ATUALIZANDO_LCD --> ESPERA_LCD : Envia dados (RS, RW, D0-D7)
-    ESPERA_LCD --> AGUARDANDO_INSTRUCAO : Aguarda propagação (~1ms)
+    ATUALIZANDO_LCD --> ESPERANDO : Seta lcd_en = 1
 ```
 ## MEMORIA
 ```mermaid
-
 stateDiagram-v2
-    [*] --> OCIOSO
-    
-    OCIOSO --> ZERAR_REGISTRADORES : Sinal de CLEAR (Opcode 110) ou Ligar/Desligar
-    ZERAR_REGISTRADORES --> OCIOSO : Todos os 16 regs = 0
-    
-    OCIOSO --> LENDO_DADOS : Solicitação de leitura (Src1, Src2)
-    LENDO_DADOS --> OCIOSO : Retorna valores para a ULA
-    
-    OCIOSO --> ESCREVENDO_DADOS : Solicitação de gravação (Dest)
-    ESCREVENDO_DADOS --> OCIOSO : Atualiza registrador alvo
+    [*] --> ESTADO_ATUAL
+
+    ESTADO_ATUAL --> RESET_SINCRONO : posedge clk<br/>com rst == 1
+    RESET_SINCRONO --> ESTADO_ATUAL : Todos regs = 0
+
+    ESTADO_ATUAL --> ESCRITA_SINCRONA : posedge clk<br/>com we == 1 e rst == 0
+    ESCRITA_SINCRONA --> ESTADO_ATUAL : ram[addr_w] = data_in
+
+    note right of ESTADO_ATUAL: A leitura das saídas<br/>data_r1 e data_r2<br/>ocorre de forma<br/>combinacional.
 ```
 ## ULA
 
 ```mermaid
 stateDiagram-v2
-    [*] --> AGUARDANDO_OPERACAO
-    
-    AGUARDANDO_OPERACAO --> DECODIFICA_OPCODE : Recebe sinal de execução da CPU
-    
-    state DECODIFICA_OPCODE {
-        direction LR
-        [*] --> LOAD_000
-        [*] --> ADD_001
-        [*] --> ADDI_010
-        [*] --> SUB_011
-        [*] --> SUBI_100
-        [*] --> MUL_101
-        [*] --> DISPLAY_111
-    }
-    
-    DECODIFICA_OPCODE --> RESULTADO_PRONTO : Calcula saída
-    RESULTADO_PRONTO --> AGUARDANDO_OPERACAO : Retorna valor para gravação
+    [*] --> AGUARDANDO_MUDANCA
+
+    AGUARDANDO_MUDANCA --> AVALIAR_OPCODE : Mudança no Opcode<br/>ou Operandos
+
+    AVALIAR_OPCODE --> ATRIBUICAO_LOAD : 000 (LOAD)
+    AVALIAR_OPCODE --> SOMA : 001 (ADD) ou 010 (ADDI)
+    AVALIAR_OPCODE --> SUBTRACAO : 011 (SUB) ou 100 (SUBI)
+    AVALIAR_OPCODE --> MULTIPLICACAO : 101 (MUL)
+    AVALIAR_OPCODE --> CONTROLE : 110 (CLEAR) ou 111 (DISPLAY)
+
+    ATRIBUICAO_LOAD --> AGUARDANDO_MUDANCA : resultado = num1
+    SOMA --> AGUARDANDO_MUDANCA : resultado = num1 + num2
+    SUBTRACAO --> AGUARDANDO_MUDANCA : resultado = num1 - num2
+    MULTIPLICACAO --> AGUARDANDO_MUDANCA : resultado = num1 * num2
+    CONTROLE --> AGUARDANDO_MUDANCA : resultado = 0
 ```
