@@ -10,9 +10,9 @@ stateDiagram-v2
     ESPERANDO --> DESLIGADO : ligar_solto == 1
     ESPERANDO --> PROCESSANDO : enviar_solto == 1
     
-    PROCESSANDO --> ATUALIZANDO_LCD : Decodifica opcode<br/>Estende sinal<br/>Seta we_mem<br/>Roteia ULA
+    PROCESSANDO --> DESCARREGANDO : Decodifica opcode<br/>Estende sinal<br/>Seta we_mem<br/>Roteia ULA
     
-    ATUALIZANDO_LCD --> ESPERANDO : Seta lcd_en = 1
+    DESCARREGANDO --> ESPERANDO : Seta lcd_en = 1
 ```
 ## MEMORIA
 ```mermaid
