@@ -56,11 +56,11 @@ module module_mini_cpu(
     wire [15:0] alu_result;
 
     module_alu ula(
-        .opcode(alu_opcode);
-        .num1(alu_num1);
-        .num2(alu_num2);
-        .resultado(alu_result);
-    )
+        .opcode(alu_opcode),
+        .num1(alu_num1),
+        .num2(alu_num2),
+        .resultado(alu_result)
+    );
 
     // mapeamento de switches
 
@@ -105,7 +105,7 @@ module module_mini_cpu(
 
             PROCESSANDO: begin
                 case(opcode)
-                    3'b001, 3'b011: begin
+                    3'b001, 3'b011: begin//ADD SUB
                         alu_opcode <= opcode;
                         addr_w  <= addr1;
 
@@ -119,7 +119,7 @@ module module_mini_cpu(
                         data_in <= alu_result;
                     end
 
-                    3'b010, 3'b100, 3'101: begin
+                    3'b010, 3'b100, 3'b101: begin// ADDI SUBI MUL
                          alu_opcode <= opcode;
                          addr_w <= addr1;
 
@@ -132,7 +132,7 @@ module module_mini_cpu(
                          data_in <= alu_result;
                     end
 
-                    3'b000: begin
+                    3'b000: begin//LOAD
                         alu_opcode <= opcode;
                         addr_w <= addr1;
 
@@ -142,11 +142,11 @@ module module_mini_cpu(
                         data_in <= alu_result;
                     end
 
-                    3'b110: begin
+                    3'b110: begin//CLEAR
                         rst_mem <= 1; // LCD só vai mostrar a operação
                     end
 
-                    3'b111: begin
+                    3'b111: begin//DISPLAY
                         // o lcd vai ler addr_w e data_in. deixamos we_memm = 0 para atualiza-los sem mexer na memoria 
                         addr_w <= addr1;
                         addr_r1 <= addr1;
