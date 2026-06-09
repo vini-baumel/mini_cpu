@@ -143,11 +143,14 @@ module module_mini_cpu(
                     end
 
                     3'b110: begin
-                        rst_mem <= 1;
+                        rst_mem <= 1; // LCD só vai mostrar a operação
                     end
 
                     3'b111: begin
+                        // o lcd vai ler addr_w e data_in. deixamos we_memm = 0 para atualiza-los sem mexer na memoria 
                         addr_w <= addr1;
+                        addr_r1 <= addr1;
+                        data_in <= data_out1;
                     end
 
                 endcase
