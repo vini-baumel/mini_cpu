@@ -39,11 +39,9 @@ stateDiagram-v2
     AVALIAR_OPCODE --> SOMA : 001 (ADD) ou 010 (ADDI)
     AVALIAR_OPCODE --> SUBTRACAO : 011 (SUB) ou 100 (SUBI)
     AVALIAR_OPCODE --> MULTIPLICACAO : 101 (MUL)
-    AVALIAR_OPCODE --> CONTROLE : 110 (CLEAR) ou 111 (DISPLAY)
 
     ATRIBUICAO_LOAD --> AGUARDANDO_MUDANCA : resultado = num1
     SOMA --> AGUARDANDO_MUDANCA : resultado = num1 + num2
     SUBTRACAO --> AGUARDANDO_MUDANCA : resultado = num1 - num2
     MULTIPLICACAO --> AGUARDANDO_MUDANCA : resultado = num1 * num2
-    CONTROLE --> AGUARDANDO_MUDANCA : resultado = 0
 ```
