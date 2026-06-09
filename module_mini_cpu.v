@@ -147,7 +147,7 @@ module module_mini_cpu(
                     end
 
                     3'b111: begin
-                        addr1_r1 <= addr1;
+                        addr_w <= addr1;
                     end
 
                 endcase
