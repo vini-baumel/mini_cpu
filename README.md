@@ -55,12 +55,12 @@ stateDiagram-v2
 
     AGUARDANDO_MUDANCA --> AVALIAR_OPCODE : Mudança no Opcode<br/>ou Operandos
 
-    AVALIAR_OPCODE --> ATRIBUICAO_LOAD : 000 (LOAD)
+    AVALIAR_OPCODE --> LOAD : 000 (LOAD)
     AVALIAR_OPCODE --> SOMA : 001 (ADD) ou 010 (ADDI)
     AVALIAR_OPCODE --> SUBTRACAO : 011 (SUB) ou 100 (SUBI)
     AVALIAR_OPCODE --> MULTIPLICACAO : 101 (MUL)
 
-    ATRIBUICAO_LOAD --> AGUARDANDO_MUDANCA : resultado = num1
+    LOAD --> AGUARDANDO_MUDANCA : resultado = num1
     SOMA --> AGUARDANDO_MUDANCA : resultado = num1 + num2
     SUBTRACAO --> AGUARDANDO_MUDANCA : resultado = num1 - num2
     MULTIPLICACAO --> AGUARDANDO_MUDANCA : resultado = num1 * num2
