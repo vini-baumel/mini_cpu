@@ -1,18 +1,38 @@
 ## CPU
 ```mermaid
 stateDiagram-v2
-    [*] --> DESLIGADO
+    [*] --> DESLIGADO : Reset Geral
 
-    DESLIGADO --> INICIALIZANDO : ligar_solto == 1<br/>(Seta rst_mem = 1)
-    
-    INICIALIZANDO --> ESPERANDO : Transição incondicional
+    DESLIGADO --> INICIALIZANDO : ligar_solto<br/>[rst_mem=1, lcd_rst_reg=1]
+    DESLIGADO --> DESLIGADO : Caso contrário
 
-    ESPERANDO --> DESLIGADO : ligar_solto == 1
-    ESPERANDO --> PROCESSANDO : enviar_solto == 1
-    
-    PROCESSANDO --> DESCARREGANDO : Decodifica opcode<br/>Estende sinal<br/>Seta we_mem<br/>Roteia ULA
-    
-    DESCARREGANDO --> ESPERANDO : Seta lcd_en = 1
+    INICIALIZANDO --> DESCARREGANDO : !lcd_ocupado<br/>[lcd_start=1]
+    INICIALIZANDO --> INICIALIZANDO : lcd_ocupado
+
+    ESPERANDO --> DESLIGADO : ligar_solto<br/>[lcd_rst_reg=1]
+    ESPERANDO --> PROCESSANDO : enviar_solto
+    ESPERANDO --> ESPERANDO : Caso contrário
+
+    PROCESSANDO --> DESCARREGANDO : Processa Opcode<br/>[lcd_start=1]
+
+    DESCARREGANDO --> DESCARREGANDO : lcd_ocupado || lcd_start==1
+    DESCARREGANDO --> ESPERANDO : lcd_start==0 && !lcd_ocupado
+
+    note right of INICIALIZANDO
+        Zera a memória e 
+        reseta o display.
+    end note
+
+    note right of PROCESSANDO
+        Executa instruções:
+        LOAD, ADD, SUB, ADDI,
+        SUBI, MUL, CLEAR, DISPLAY
+    end note
+
+    note right of DESCARREGANDO
+        Aguarda o controlador do LCD
+        terminar de desenhar.
+    end note
 ```
 ## MEMORIA
 ```mermaid
@@ -35,13 +55,82 @@ stateDiagram-v2
 
     AGUARDANDO_MUDANCA --> AVALIAR_OPCODE : Mudança no Opcode<br/>ou Operandos
 
-    AVALIAR_OPCODE --> ATRIBUICAO_LOAD : 000 (LOAD)
+    AVALIAR_OPCODE --> LOAD : 000 (LOAD)
     AVALIAR_OPCODE --> SOMA : 001 (ADD) ou 010 (ADDI)
     AVALIAR_OPCODE --> SUBTRACAO : 011 (SUB) ou 100 (SUBI)
     AVALIAR_OPCODE --> MULTIPLICACAO : 101 (MUL)
 
-    ATRIBUICAO_LOAD --> AGUARDANDO_MUDANCA : resultado = num1
+    LOAD --> AGUARDANDO_MUDANCA : resultado = num1
     SOMA --> AGUARDANDO_MUDANCA : resultado = num1 + num2
     SUBTRACAO --> AGUARDANDO_MUDANCA : resultado = num1 - num2
     MULTIPLICACAO --> AGUARDANDO_MUDANCA : resultado = num1 * num2
 ```
+
+## LCD_INIT
+
+```mermaid
+    stateDiagram-v2
+    [*] --> S_IDLE : rst
+
+    S_IDLE --> S_POWER_WAIT : start<br/>[cmd_idx = 0]
+    S_IDLE --> S_IDLE : Caso contrário
+
+    S_POWER_WAIT --> S_SETUP : delay_cnt == 0 (Passou ~15ms)
+    S_POWER_WAIT --> S_POWER_WAIT : delay_cnt > 0
+
+    S_SETUP --> S_PULSE : cmd_idx < 4<br/>[lcd_e = 0]
+    S_SETUP --> S_DONE : cmd_idx >= 4<br/>[done = 1]
+
+    S_PULSE --> S_WAIT : delay_cnt == 0<br/>[Carrega delay do comando]
+    S_PULSE --> S_PULSE : delay_cnt > 0<br/>[lcd_e = 1]
+
+    S_WAIT --> S_SETUP : delay_cnt == 0<br/>[next_cmd_idx = cmd_idx + 1]
+    S_WAIT --> S_WAIT : delay_cnt > 0<br/>[lcd_e = 0]
+
+    S_DONE --> S_DONE : Permanece aqui até novo rst
+
+    note right of S_POWER_WAIT
+        Espera crucial para estabilização
+        da tensão do LCD físico (Vcc).
+    end note
+
+    note left of S_PULSE
+        Gera a borda de descida necessária
+        mantendo Enable=1 por ~1us.
+    end note
+```
+
+## LCD_TOP
+```mermaid
+    stateDiagram-v2
+    [*] --> S_WAIT_INIT : rst
+
+    S_WAIT_INIT --> S_IDLE : init_done (Módulo de inicialização terminou)
+    S_WAIT_INIT --> S_WAIT_INIT : !init_done
+
+    S_IDLE --> S_PREPARE : start<br/>[msg_index = 0, salva dados da CPU]
+    S_IDLE --> S_IDLE : Caso contrário
+
+    S_PREPARE --> S_PULSE_E : Transição imediata<br/>[Prepara dados/RS no barramento]
+
+    S_PULSE_E --> S_WAIT : delay_cnt == 0<br/>[Define delay de escrita]
+    S_PULSE_E --> S_PULSE_E : delay_cnt > 0<br/>[lcd_e = 1]
+
+    S_WAIT --> S_DONE : delay_cnt == 0 && msg_index == 33
+    S_WAIT --> S_PREPARE : delay_cnt == 0 && msg_index < 33<br/>[next_msg_index = msg_index + 1]
+    S_WAIT --> S_WAIT : delay_cnt > 0<br/>[lcd_e = 0]
+
+    S_DONE --> S_IDLE : Retorna para aguardar nova escrita
+
+    note left of S_WAIT_INIT
+        Enquanto estiver aqui,
+        o sinal de multiplexação joga os fios
+        do lcd_init diretamente para a saída física.
+    end note
+
+    note right of S_WAIT
+        Controla o laço (loop) que percorre
+        as 34 posições da mensagem montada.
+    end note
+```
+
