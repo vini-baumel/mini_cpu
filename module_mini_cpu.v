@@ -7,10 +7,8 @@ module module_mini_cpu(
     output wire [7:0] lcd_data,
     output wire lcd_rs,
     output wire lcd_rw,
-    output wire lcd_en,
+    output wire lcd_en
 	 
-	 output wire [15:0] leds,
-	 output wire [2:0] state_leds
 );
     // Estados
     parameter DESLIGADO = 3'd0;
@@ -21,7 +19,6 @@ module module_mini_cpu(
 	 
     reg[2:0] state = DESLIGADO;
 	 
-	 assign state_leds = state;
 
     // Detectores de negedge 
     reg btn_ligar_reg, btn_enviar_reg; // guarda o estado anterior
@@ -41,7 +38,6 @@ module module_mini_cpu(
     reg [15:0] data_in;
     wire [15:0] data_out1, data_out2;
 	 
-	 assign leds = data_in;
 	 
 	 
 	// mapeamento de switches
@@ -186,7 +182,7 @@ module module_mini_cpu(
 		
 		case (opcode) // enderecos de leitura (num1)
 			3'b000: begin // LOAD
-				addr_r1 = addr2;
+				//addr_r1 = addr2;
 				alu_num1 = imediato_convertido; // usa o imediato
 			end
 			3'b001, 3'b011: begin // ADD, SUB
