@@ -1,0 +1,48 @@
+# =======================================================================
+# Arquivos que DEVEM ser mantidos (Apenas para referência, o git já os rastreia)
+# .v, .sv, .vhd (Códigos fonte)
+# .qpf (Quartus Project File)
+# .qsf (Quartus Settings File - Contém as atribuições de pinos e configs)
+# .sdc (Synopsys Design Constraints - Arquivos de timing)
+# =======================================================================
+
+# --- Pastas de Compilação e Logs do Quartus ---
+db/
+incremental_db/
+simulation/
+greybox_tmp/
+hc_output/
+hps_isw_handoff/
+sys_description/
+qsys_headers/
+.qsys_edit/
+
+# --- Arquivos temporários e de saída em massa ---
+*.rpt
+*.summary
+*.sof
+*.pof
+*.ttf
+*.jbc
+*.ekp
+*.map
+*.pin
+*.done
+*.qws
+*.bak
+*.chg
+*.vwm
+*.bdf.bak
+*.dpf
+*.smsg
+
+# --- Resultados de Simulação (ModelSim / Questa) ---
+modelsim.ini
+transcript
+vsim.wlf
+work/
+msim_transcript
+
+# --- Arquivos do sistema operacional ---
+.DS_Store
+Thumbs.db
