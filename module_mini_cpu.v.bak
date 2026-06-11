@@ -71,8 +71,8 @@ module module_mini_cpu(
 
     wire sinal1           = switches[6];
     wire [5:0] immediato1 = switches[5:0];
-    // wire sinal2           = switches[14];
-    // wire [5:0] immediato2 = switches[13:8];
+    wire sinal2           = switches[14];
+    wire [5:0] immediato2 = switches[13:8];
 
     always @(posedge clk) begin
 
@@ -136,7 +136,7 @@ module module_mini_cpu(
                         alu_opcode <= opcode;
                         addr_w <= addr1;
 
-                        alu_num1 <= {{10{sinal1}}, immediato1}; // cria um numero de 16 bits 
+                        alu_num1 <= {{10{sinal2}}, immediato2}; // cria um numero de 16 bits 
 
                         we_mem <= 1;
                         data_in <= alu_result;

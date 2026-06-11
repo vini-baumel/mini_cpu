@@ -12,17 +12,17 @@ output reg [15:0] data_out2
 
 	reg [15:0] ram [0:15];
 	integer i;
-
+	
 	always @(posedge clk or posedge rst) begin
-		if (rst) begin // zera todos os registradores
+		if (rst) begin
 			for (i = 0; i < 16; i = i + 1)begin
 				ram[i] <= 16'b0;
 			end
-		end else if (we) begin // escreve no endereco solicitado
+		end else if (we) begin
 			ram[addr_w] <= data_in;
 		end
 	end
-
+	
 	// os dados de saída mudam sempre com os enderecos de entrada
 	always @(*)begin
 		data_out1 = ram[addr_r1];

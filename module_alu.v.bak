@@ -19,8 +19,8 @@ output reg signed [15:0] resultado
 			3'b101: // MUL
 				resultado = num1 * num2;
 				
-			3'b111: // CLEAR E DISPLAY
-				resultado = num1;
+			// 3'b110, 3'b111: // CLEAR E DISPLAY
+			// 	resultado = 16'd0;
 				
 			default:
 				resultado = 16'd0;
